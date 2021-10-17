@@ -240,6 +240,31 @@ class FileRepository {
     logger.i('IOS appname changed successfully to : $appName');
     return writtenFile;
   }
+  
+  Future<File?> changeIosDisplayedAppName(String? appName) async {
+    List? contentLineByLine = await readFileAsLineByline(
+      filePath: iosInfoPlistPath,
+    );
+    if (checkFileExists(contentLineByLine)) {
+      logger.w('''
+      Ios AppName could not be changed because,
+      The related file could not be found in that path:  $iosInfoPlistPath
+      ''');
+      return null;
+    }
+    for (var i = 0; i < contentLineByLine!.length; i++) {
+      if (contentLineByLine[i].contains('<key>CFBundleDisplayName</key>')) {
+        contentLineByLine[i + 1] = '\t<string>$appName</string>\r';
+        break;
+      }
+    }
+    var writtenFile = await writeFile(
+      filePath: iosInfoPlistPath,
+      content: contentLineByLine.join('\n'),
+    );
+    logger.i('IOS appname changed successfully to : $appName');
+    return writtenFile;
+  }
 
   Future<File?> changeMacOsAppName(String? appName) async {
     List? contentLineByLine = await readFileAsLineByline(
